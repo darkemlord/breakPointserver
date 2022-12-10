@@ -65,4 +65,14 @@ router.put("/:id/password", async (req, res) => {
   });
 });
 
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  await User.findByIdAndDelete(id);
+
+  res.send({
+    message: "User deleted successfully",
+  });
+});
+
 module.exports = router;
