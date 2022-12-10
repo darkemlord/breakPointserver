@@ -48,4 +48,18 @@ router.post("/login", async (req, res) => {
   const token = jwt.sign({ id: user.id, name: user.name }, process.env.SECRET);
   res.json({ token });
 });
+
+router.put("/:id/password", async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = await User.findByIdAndUpdate(id, {
+    password: hashedPassword,
+  });
+  if (!user) return res.json({ error: "can't find the user" });
+  res.json({
+    message: "Password updated successfully",
+  });
+});
+
 module.exports = router;
