@@ -11,11 +11,11 @@ router.get("/", function (_req, res) {
 });
 
 router.post("/", async (req, res) => {
-  const { name, password, email } = req.body;
+  const { username, password, email } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new User({ name, password: hashedPassword, email });
+  const newUser = new User({ username, password: hashedPassword, email });
   const token = jwt.sign(
-    { name: newUser.name, email: newUser.email },
+    { username: newUser.username, email: newUser.email },
     process.env.SECRET,
     {
       expiresIn: "24h",
@@ -27,7 +27,7 @@ router.post("/", async (req, res) => {
         error: `User ${req.body.email} already exist`,
       });
     if (err) return res.json({ error: err });
-    res.json({ message: `User ${user.name} Saved Succesfully`, token });
+    res.json({ message: `User ${user.username} Saved Succesfully`, token });
   });
 });
 
@@ -45,7 +45,10 @@ router.post("/login", async (req, res) => {
       error: "user or password are invalid",
     });
   }
-  const token = jwt.sign({ id: user.id, name: user.name }, process.env.SECRET);
+  const token = jwt.sign(
+    { id: user.id, username: user.username },
+    process.env.SECRET
+  );
   res.json({ token });
 });
 
