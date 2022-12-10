@@ -29,7 +29,7 @@ router.post("/", async (req, res) => {
         error: `User ${req.body.email} already exist`,
       });
     if (err) return res.json({ error: err });
-    res.json({ message: `User ${user.username} Saved Succesfully`, token });
+    res.json({ message: `User ${user.username} Saved Successfully`, token });
   });
 });
 
