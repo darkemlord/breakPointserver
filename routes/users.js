@@ -3,11 +3,13 @@ const router = express.Router();
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const middleware = require("./middleware");
 require("dotenv").config();
 
 /* GET users listing. */
-router.get("/", function (_req, res) {
-  res.send("listening");
+router.get("/", middleware, async function (_req, res) {
+  const allUsers = await User.find({}, { password: 0 });
+  res.json(allUsers);
 });
 
 router.post("/", async (req, res) => {
