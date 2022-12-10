@@ -14,7 +14,8 @@ router.get("/", middleware, async function (_req, res) {
 
 router.post("/", async (req, res) => {
   const { username, password, email } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = await bcrypt.hash(password || "", salt);
   const newUser = new User({ username, password: hashedPassword, email });
   const token = jwt.sign(
     { username: newUser.username, email: newUser.email },
@@ -34,30 +35,35 @@ router.post("/", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(401).json({
-      error: "user or password are invalid",
-    });
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        error: "user or password are invalid",
+      });
+    }
+    const passwordsMatch = await bcrypt.compare(password, user.password);
+    if (!passwordsMatch) {
+      return res.status(401).send({
+        error: "user or password are invalid",
+      });
+    }
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      process.env.SECRET
+    );
+    res.json({ token });
+  } catch (err) {
+    console.log(err);
   }
-  const passwordsMatch = await bcrypt.compare(password, user.password);
-  if (!passwordsMatch) {
-    return res.status(401).send({
-      error: "user or password are invalid",
-    });
-  }
-  const token = jwt.sign(
-    { id: user.id, username: user.username },
-    process.env.SECRET
-  );
-  res.json({ token });
 });
 
 router.put("/:id/password", async (req, res) => {
   const { id } = req.params;
   const { password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = await bcrypt.hash(password || "", salt);
   const user = await User.findByIdAndUpdate(id, {
     password: hashedPassword,
   });
