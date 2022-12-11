@@ -13,7 +13,6 @@ mongoose
   })
   .then(() => {
     console.log("MongoDB connection successful");
-    console.log(process.env.MONGODATABASE);
   })
   .catch((err) => {
     console.error(err);
